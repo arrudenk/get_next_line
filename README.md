@@ -1,8 +1,6 @@
 # Get Next Line
 DONT PANIC
-# Build in Clion:
-* Build config in CLION ![alt text](https://i.imgur.com/wZCiu1d.png)
-* build [libft][libft] on your system and add to get_next_line/libft (libft.a, libft.h)
+build [libft][libft] on your system and add to get_next_line/libft (libft.a, libft.h)
 # Project Rules
 * [get_next_line.pdf][GNL]
 ### Fndamental rules
