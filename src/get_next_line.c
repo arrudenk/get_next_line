@@ -10,9 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdio.h>
 #include "get_next_line.h"
 
-int		check_n(char **line, t_tail *tail)
+int		check_n(char *line, t_tail *tail)
 {
 	int		i;
 	int		rt;
@@ -22,19 +23,19 @@ int		check_n(char **line, t_tail *tail)
 	i = -1;
 	rt = 1;
 	v = 0;
-	while (*line[++i])
+	while (line[++i])
 	{
-		if (*line[i] == '\n')
+		if (line[i] == '\n')
 		{
 			t = i;
-			tail->str = ft_memalloc(ft_strlen(*line) - i + 1);
-			while (*line[++i])
+			tail->str = ft_memalloc(ft_strlen(line) - i + 1);
+			while (line[++i])
 			{
-				tail->str[v] = *line[i];
-				*line[i] = '\0';
+				tail->str[v] = line[i];
+				line[i] = '\0';
 				v++;
 			}
-			*line = ft_strsub(*line, 0, t);
+			line = ft_strsub(line, 0, t);
 			tail->str[v] = '\0';
 			rt = 0;
 		}
@@ -77,35 +78,52 @@ int		get_next_line(const int fd, char **line)
 	t_tail			*tail;
 	static t_list	*fd_list = NULL;
 
+	buff = NULL;
 	if(fd_list == NULL)
 		fd_list = init_list(fd);
 	tail = find_fd(fd_list, fd);
+	if (*line == NULL)
+		*line = ft_memalloc(sizeof(char));
 	if (tail->str != NULL)
 		*line = ft_strjoin(*line, tail->str);
 	ft_strdel(&tail->str);
+	check_n(*line, tail);
 	buff = ft_memalloc(sizeof(char) * BUFF_SIZE);
 	while (read(fd, (void *)buff, BUFF_SIZE) > 0)
 	{
 		*line = ft_strjoin(*line, buff);
-		if (check_n(&*line, tail))
+		if (!check_n(*line, tail))
 			break ;
 	}
-	return (0);
+	if (tail->str == NULL && ft_strlen(*line) == 0)
+	{
+		ft_strdel(line);
+		return (0);
+	}
+	return (1);
 }
 
 int		main(int argc, char **argv)
 {
 	(void)argc;
-	char *buff;
+	char *line;
 	int		fd;
 	char	*arg;
 
+	line = NULL;
+
 	arg = argv[1];
 
-	fd = ("./arg/test7", O_RDONLY);
-	get_next_line(fd, &buff);
-
-	ft_putstr(buff);
-
-
+	fd = open(argv[1], O_RDONLY);
+	int check;
+	check = 1;
+	while (check != 0 && check != -1)
+	{
+		check = get_next_line(fd, &line);
+		if (check != 0 && check != -1)
+			printf("gnl returned %d | line is %s\n", check, line);
+		ft_strdel(&line);
+	}
+	printf("Reading complete\n");
+	return (0);
 }
