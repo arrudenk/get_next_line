@@ -50,7 +50,7 @@ t_list	*init_list(const int fd)
 	return (fd_list);
 }
 
-int		get_line(char **str)
+int		discard_tail(char **str)
 {
 	char	*result;
 
@@ -93,7 +93,7 @@ int		get_next_line(const int fd, char **line)
 	ft_strdel(&buff);
 	*line = !ft_strchr(t->str, '\n') ? ft_strsub(t->str, 0, ft_strlen(t->str))
 			:ft_strsub(t->str, 0, (ft_strchr(t->str, '\n') - t->str));
-	return (get_line(&t->str));
+	return (discard_tail(&t->str));
 }
 
 int		main(int argc, char **argv)
