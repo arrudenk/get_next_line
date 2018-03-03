@@ -20,5 +20,5 @@ char	*ft_strchr(const char *string, int symbol)
 	while (++a < (int)ft_strlen(string) + 1)
 		if (*(string + a) == (char)symbol)
 			return ((char *)string + a);
-	return (0);
+	return (NULL);
 }
