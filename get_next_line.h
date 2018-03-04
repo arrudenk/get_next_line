@@ -10,17 +10,21 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_GET_NEXT_LINE_H
-#define GET_NEXT_LINE_GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
 # include "libft.h"
 # include "fcntl.h"
 # define BUFF_SIZE 32
 
-typedef struct	s_tail
+typedef struct		s_tail
 {
-	char	*str;
-	int		fd;
-}				t_tail;
+	char			*str;
+	int				fd;
+	struct s_tail	*start;
+	struct s_tail	*next;
+}					t_tail;
+
+int					get_next_line(const int fd, char **line);
 
 #endif
