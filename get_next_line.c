@@ -10,46 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <printf.h>
 #include "get_next_line.h"
 
-t_tail	*init_list(int fd)
-{
-	t_tail	*tail;
-
-	tail = ft_memalloc(sizeof(t_tail));
-	tail->fd = fd;
-	tail->str = ft_strnew(0);
-	tail->next = NULL;
-	tail->start = tail;
-	return (tail);
-}
-
-t_tail	*add_fd(int fd, t_tail *tail)
-{
-	tail = ft_memalloc(sizeof(t_tail));
-	tail->fd = fd;
-	tail->str = ft_strnew(0);
-	tail->next = NULL;
-	return (tail);
-}
-
-t_tail	*find_fd(t_tail *tail, int fd)
-{
-	t_tail	*temp;
-
-	temp = tail;
-	while (tail != NULL)
-	{
-		if (tail->fd == fd)
-			return (tail);
-		tail = tail->next;
-	}
-	tail = add_fd(fd, tail);
-	tail->next = temp;
-	return (tail);
-}
-
-int		discard_tail(t_tail *tail)
+int			discard_tail(t_tail *tail)
 {
 	char	*result;
 
@@ -63,37 +27,78 @@ int		discard_tail(t_tail *tail)
 		return (1);
 	}
 	tail->str = ft_strdup(ft_strchr(tail->str, '\n') + 1);
-	free(result);
+	ft_strdel(&result);
 	return (1);
 }
 
-int		get_next_line(const int fd, char **line)
+t_tail		**init_list(void)
 {
-	char			*buff;
-	ssize_t			bs;
-	static t_tail	*t = NULL;
+	t_tail	**list;
 
-	if (fd == 4)
-		ft_putchar('j');
+	list = (t_tail**)ft_memalloc(sizeof(t_tail*));
+	*list = NULL;
+	return (list);
+}
+
+t_tail		*find_fd(t_tail **start, int fd)
+{
+	t_tail *tail;
+
+	tail = *start;
+	if (tail != NULL)
+		while (tail != NULL && tail->fd != fd)
+			tail = tail->next;
+	if (tail == NULL)
+	{
+		tail = (t_tail*)ft_memalloc(sizeof(t_tail));
+		tail->fd = fd;
+		if (!(tail->str = ft_strnew(0)))
+			return (NULL);
+		tail->next = *start;
+		*start = tail;
+	}
+	return (tail);
+}
+
+int			reader(t_tail *tail)
+{
+	ssize_t	bs;
+	char	*buff;
+
 	buff = ft_strnew(sizeof(char) * BUFF_SIZE);
-	if (fd < 0 || !line || !buff)
-		return (-1);
-	if (t == NULL)
-		add_fd(fd, t);
-	t = (t == NULL) ? (add_fd(fd, t)) : (find_fd(t, fd));
-	if (t->str == NULL)
-		return (0);
-	while ((bs = read(fd, (void *)buff, BUFF_SIZE)))
+	while ((bs = read(tail->fd, (void *)buff, BUFF_SIZE)))
 	{
 		if (bs == -1)
 			return (-1);
-		t->str = ft_strjoin(t->str, buff);
+		tail->str = ft_strjoin(tail->str, buff);
+//		printf("%s\n",buff);
 		ft_bzero(buff, BUFF_SIZE + 1);
-		if ((ft_strchr(t->str, '\n')))
+		if ((ft_strchr(tail->str, '\n')))
 			break ;
 	}
 	ft_strdel(&buff);
-	*line = (!ft_strchr(t->str, '\n')) ? ft_strsub(t->str, 0, ft_strlen(t->str))
-			: ft_strsub(t->str, 0, (ft_strchr(t->str, '\n') - t->str));
+	return (1);
+}
+
+int			get_next_line(const int fd, char **line)
+{
+	static t_tail	**list = NULL;
+	t_tail			*t;
+
+	if (fd < 0 || !line)
+		return (-1);
+	if (list == NULL)
+		list = init_list();
+	t = find_fd(list, fd);
+	if (t == NULL)
+		return (-1);
+	if (t->str == NULL)
+		return (0);
+	if (reader(t) == -1)
+		return (-1);
+	if (!ft_strchr(t->str, '\n'))
+		*line = ft_strsub(t->str, 0, ft_strlen(t->str));
+	else
+		*line = ft_strsub(t->str, 0, (ft_strchr(t->str, '\n') - t->str));
 	return (discard_tail(t));
 }

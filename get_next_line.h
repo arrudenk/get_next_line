@@ -15,13 +15,12 @@
 
 # include "libft.h"
 # include "fcntl.h"
-# define BUFF_SIZE 32
+# define BUFF_SIZE 10000000
 
 typedef struct		s_tail
 {
 	char			*str;
 	int				fd;
-	struct s_tail	*start;
 	struct s_tail	*next;
 }					t_tail;
 
